@@ -1,11 +1,20 @@
-from multiparent_dnc import NeuralCrossover
+from DNC_mid_train.multiparent_dnc import NeuralCrossover
+from eckity.before_after_publisher import BeforeAfterPublisher
 import torch
 
+BEFORE_TRAIN_EVENT_NAME = 'before_train'
+AFTER_TRAIN_EVENT_NAME = 'after_train'
 
-class NeuralCrossoverWrapper:
+
+class NeuralCrossoverWrapper(BeforeAfterPublisher):
     def __init__(self, embedding_dim, sequence_length, num_embeddings, get_fitness_function, running_mean_decay=0.99,
                  batch_size=32, load_weights_path=None, freeze_weights=False, learning_rate=1e-3, epsilon_greedy=0.1,
-                 use_scheduler=False, use_device='cpu', adam_decay=0, clip_grads=False, n_parents=2):
+                 use_scheduler=False, use_device='cpu', adam_decay=0, clip_grads=False, n_parents=2, events=None, event_names=None):
+        ext_events_names = event_names if event_names is not None else []
+        if events is None:
+            # Initialize events dictionary with event names as keys and subscribers as values
+            ext_events_names.extend([BEFORE_TRAIN_EVENT_NAME, AFTER_TRAIN_EVENT_NAME])
+        super.__init__(events, event_names)
         self.device = use_device
         self.neural_crossover = NeuralCrossover(embedding_dim, embedding_dim, num_embeddings, sequence_length,
                                                 n_parents=n_parents, device=use_device).to(

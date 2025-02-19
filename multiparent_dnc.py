@@ -1,7 +1,7 @@
 import torch
-from sequence_linear_embedding import SequenceLinearEmbedding
-from pointer_encoder import PointerEncoder
-from pointer_decoder import PointerDecoder
+from DNC_mid_train.sequence_linear_embedding import SequenceLinearEmbedding
+from DNC_mid_train.pointer_encoder import PointerEncoder
+from DNC_mid_train.pointer_decoder import PointerDecoder
 
 
 class NeuralCrossover(torch.nn.Module):

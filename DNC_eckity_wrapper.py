@@ -5,7 +5,7 @@ from eckity.creators.ga_creators.simple_vector_creator import GAVectorCreator
 
 from eckity.evaluators.simple_individual_evaluator import SimpleIndividualEvaluator
 from eckity.genetic_operators.genetic_operator import GeneticOperator
-from multiparent_wrapper import NeuralCrossoverWrapper
+from DNC_mid_train.multiparent_wrapper import NeuralCrossoverWrapper
 
 
 class DeepNeuralCrossoverConfig:

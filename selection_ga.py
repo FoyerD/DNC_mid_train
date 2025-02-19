@@ -5,7 +5,7 @@ import time
 import numpy as np
 from copy import deepcopy
 from tqdm import tqdm
-from ga_auxiliary import create_output_folder, save_list, save_dict, is_in_dict, get_fit, \
+from DNC_mid_train.ga_auxiliary import create_output_folder, save_list, save_dict, is_in_dict, get_fit, \
     save_fitness, n_point_crossover_pairs, n_point_mutate, tournament_selection
 
 

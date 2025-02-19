@@ -1,5 +1,5 @@
-from selection_ga import SelectionGA
-from multiparent_wrapper import NeuralCrossoverWrapper
+from DNC_mid_train.selection_ga import SelectionGA
+from DNC_mid_train.multiparent_wrapper import NeuralCrossoverWrapper
 import numpy as np
 import torch
 import json
