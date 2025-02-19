@@ -14,7 +14,7 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         if events is None:
             # Initialize events dictionary with event names as keys and subscribers as values
             ext_events_names.extend([BEFORE_TRAIN_EVENT_NAME, AFTER_TRAIN_EVENT_NAME])
-        super.__init__(events, event_names)
+        super.__init__(events, ext_events_names)
         self.device = use_device
         self.neural_crossover = NeuralCrossover(embedding_dim, embedding_dim, num_embeddings, sequence_length,
                                                 n_parents=n_parents, device=use_device).to(
