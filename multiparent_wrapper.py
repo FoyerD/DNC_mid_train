@@ -14,7 +14,7 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         if events is None:
             # Initialize events dictionary with event names as keys and subscribers as values
             ext_events_names.extend([BEFORE_TRAIN_EVENT_NAME, AFTER_TRAIN_EVENT_NAME])
-        super.__init__(events, ext_events_names)
+        super().__init__(events, ext_events_names)
         self.device = use_device
         self.neural_crossover = NeuralCrossover(embedding_dim, embedding_dim, num_embeddings, sequence_length,
                                                 n_parents=n_parents, device=use_device).to(
@@ -70,6 +70,7 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         if total_batches_length < self.batch_size:
             return
 
+        self.publish(BEFORE_TRAIN_EVENT_NAME)
         self.acc_batch_length = 0
 
         fitness_values, sampled_action_space, sampled_solutions = self.get_batch_and_clear()
@@ -88,7 +89,8 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
 
         if self.use_scheduler:
             self.scheduler.step(loss)
-
+        
+        self.publish(AFTER_TRAIN_EVENT_NAME)
         print(f'loss: {loss}, reward: {torch.mean(fitness_values.type(torch.DoubleTensor))}')
 
     def combine_parents_uniform(self, parents_matrix):
