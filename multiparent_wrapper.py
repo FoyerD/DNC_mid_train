@@ -1,6 +1,7 @@
 from DNC_mid_train.multiparent_dnc import NeuralCrossover
 from eckity.before_after_publisher import BeforeAfterPublisher
 import torch
+print(torch.__version__)
 
 BEFORE_TRAIN_EVENT_NAME = 'before_train'
 AFTER_TRAIN_EVENT_NAME = 'after_train'
