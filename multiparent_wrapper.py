@@ -22,7 +22,7 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
             self.device)
         self.running_mean_decay = running_mean_decay
         self.optimizer = torch.optim.Adam(self.neural_crossover.parameters(), lr=learning_rate, weight_decay=adam_decay)
-        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, 'min', patience=10, verbose=True)
+        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, 'min', patience=10)
         self.get_fitness_function = get_fitness_function
         self.batch_size = batch_size
         self.n_parents = n_parents
