@@ -2,4 +2,3 @@ numpy~=1.26.4
 torch~=2.0.1
 eckity~=0.3.4
 tqdm~=4.64.0
-
