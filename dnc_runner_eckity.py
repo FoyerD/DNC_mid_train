@@ -1,3 +1,4 @@
+from typing import Dict, List
 from eckity.genetic_operators.mutations.vector_n_point_mutation import VectorNPointMutation
 
 from eckity.evaluators.simple_individual_evaluator import SimpleIndividualEvaluator
@@ -89,7 +90,7 @@ class FrozenLakeEvaluator(SimpleIndividualEvaluator):
         self.num_games = num_games
         if map is not None:
             self._env = gym.make("FrozenLake-v1", map_name=map, is_slippery=self.slippery)
-            self.board_size = sqrt(len(map))
+            self.board_size = int(np.sqrt(len(map)))
             self.index_mapping = self.make_index_mapping(map)
         else:
             self._env = gym.make("FrozenLake-v1", map_name="8x8", is_slippery=self.slippery)
@@ -111,7 +112,7 @@ class FrozenLakeEvaluator(SimpleIndividualEvaluator):
         index_mapping = {}
         offset = 0
         i = 0
-        while map[i] != 'G' and ma[i+offset] != 'G':
+        while map[i] != 'G' and map[i+offset] != 'G':
             cell = map[i]
             if cell == 'H':
                 offset += 1
