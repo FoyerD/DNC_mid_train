@@ -13,7 +13,7 @@ import numpy as np
 from DNC_mid_train.DNC_eckity_wrapper import DeepNeuralCrossoverConfig, GAIntegerStringVectorCreator, DeepNeuralCrossover
 from random import random
 import gymnasium as gym
-
+from tqdm import tqdm
 
 
 def uniform_cell_selector(vec):
@@ -91,13 +91,13 @@ class FrozenLakeEvaluator(SimpleIndividualEvaluator):
         if map is not None:
             self._env = gym.make("FrozenLake-v1", map_name=map, is_slippery=self.slippery)
             self.board_size = int(np.sqrt(len(map)))
-            self.index_mapping = self.make_index_mapping(map)
+            self.index_mapping = FrozenLakeEvaluator.make_index_mapping(map)
         else:
             self._env = gym.make("FrozenLake-v1", map_name="8x8", is_slippery=self.slippery)
             self.board_size = 8
-            self.index_mapping = make_index_mapping(self._env.unwrapped.desc.flatten().tolist())
+            self.index_mapping = FrozenLakeEvaluator.make_index_mapping(self._env.unwrapped.desc.flatten().tolist())
                                                          
-    def get_inidividual_length(self):
+    def get_individual_length(self):
         """
             Get the length of the individual for this evaluator.
 
@@ -108,15 +108,16 @@ class FrozenLakeEvaluator(SimpleIndividualEvaluator):
         """
         return len(self.index_mapping)
 
-    def make_index_mapping(self, map: List) -> Dict [int, int]:
+    def make_index_mapping(map: List) -> Dict [int, int]:
         index_mapping = {}
         offset = 0
         i = 0
-        while map[i] != 'G' and map[i+offset] != 'G':
+        while map[i+offset] != b'G' and i+offset < len(map):
             cell = map[i]
             if cell == 'H':
                 offset += 1
-            index_mapping[i] = i + offset
+            index_mapping[i+offset] = i
+            i += 1
         return index_mapping
     
     def evaluate_individual(self, individual):
@@ -133,16 +134,19 @@ class FrozenLakeEvaluator(SimpleIndividualEvaluator):
             float
                 The evaluated fitness value of the given individual.
         """
+        return self.get_individual_fitness(np.array(individual.vector))
+        
+    def get_individual_fitness(self, individual):
         fitness_sum = 0.0
-        for _ in range(num_games):
+        for _ in range(self.num_games):
             observation, info = self._env.reset()
             terminated = False
             truncated = False
             while not terminated and not truncated:
                 action = individual[self.index_mapping[observation]]
-                observation, reward, terminated, truncated, info = env.step(action)
+                observation, reward, terminated, truncated, info = self._env.step(action)
                 fitness_sum += reward
-        return fitness_sum / num_games
+        return fitness_sum / self.num_games
         
 
             
