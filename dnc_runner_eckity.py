@@ -83,9 +83,10 @@ class BinPackingEvaluator(SimpleIndividualEvaluator):
         return fitness
 
 class FrozenLakeEvaluator(SimpleIndividualEvaluator):
-    def __init__(self, slippery: bool = True, map: List = None):
+    def __init__(self, slippery: bool = True, map: List = None, num_games: int = 2000):
         super().__init__()
         self.slippery = slippery
+        self.num_games = num_games
         if map is not None:
             self._env = gym.make("FrozenLake-v1", map_name=map, is_slippery=self.slippery)
             self.board_size = sqrt(len(map))
@@ -122,23 +123,7 @@ class FrozenLakeEvaluator(SimpleIndividualEvaluator):
             float
                 The evaluated fitness value of the given individual.
         """
-        return self.get_frozen_lake_fitness(np.array(individual.vector), num_games=2000)
-        
-    def get_frozen_lake_fitness(self, individual, num_games : int =2000):
-        """
-            Compute the fitness value for a Frozen Lake individual.
-
-            Parameters
-            ----------
-            individual: Vector
-                The individual to compute the fitness value for.
-
-            Returns
-            -------
-            float
-                The evaluated fitness value of the given individual.
-        """
-        fitness_sum = 0
+        fitness_sum = 0.0
         for _ in range(num_games):
             observation, info = self._env.reset()
             terminated = False
@@ -148,6 +133,7 @@ class FrozenLakeEvaluator(SimpleIndividualEvaluator):
                 observation, reward, terminated, truncated, info = env.step(action)
                 fitness_sum += reward
         return fitness_sum / num_games
+        
 
             
 
