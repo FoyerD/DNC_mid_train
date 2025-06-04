@@ -96,7 +96,16 @@ class FrozenLakeEvaluator(SimpleIndividualEvaluator):
             self.board_size = 8
             self.index_mapping = make_index_mapping(self._env.unwrapped.desc.flatten().tolist())
                                                          
-        
+    def get_inidividual_length(self):
+        """
+            Get the length of the individual for this evaluator.
+
+            Returns
+            -------
+            int
+                The length of the individual.
+        """
+        return len(self.index_mapping)
 
     def make_index_mapping(self, map: List) -> Dict [int, int]:
         index_mapping = {}
