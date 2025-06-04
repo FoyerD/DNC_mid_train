@@ -11,6 +11,8 @@ import json
 import numpy as np
 from DNC_mid_train.DNC_eckity_wrapper import DeepNeuralCrossoverConfig, GAIntegerStringVectorCreator, DeepNeuralCrossover
 from random import random
+import gymnasium as gym
+
 
 
 def uniform_cell_selector(vec):
@@ -80,6 +82,76 @@ class BinPackingEvaluator(SimpleIndividualEvaluator):
         fitness_dict[tuple(individual)] = fitness
         return fitness
 
+class FrozenLakeEvaluator(SimpleIndividualEvaluator):
+    def __init__(self, slippery: bool = True, map: List = None):
+        super().__init__()
+        self.slippery = slippery
+        if map is not None:
+            self._env = gym.make("FrozenLake-v1", map_name=map, is_slippery=self.slippery)
+            self.board_size = sqrt(len(map))
+            self.index_mapping = self.make_index_mapping(map)
+        else:
+            self._env = gym.make("FrozenLake-v1", map_name="8x8", is_slippery=self.slippery)
+            self.board_size = 8
+            self.index_mapping = make_index_mapping(self._env.unwrapped.desc.flatten().tolist())
+                                                         
+        
+
+    def make_index_mapping(self, map: List) -> Dict [int, int]:
+        index_mapping = {}
+        offset = 0
+        i = 0
+        while map[i] != 'G' and ma[i+offset] != 'G':
+            cell = map[i]
+            if cell == 'H':
+                offset += 1
+            index_mapping[i] = i + offset
+        return index_mapping
+    
+    def evaluate_individual(self, individual):
+        """
+            Compute the fitness value of a given individual.
+
+            Parameters
+            ----------
+            individual: Vector
+                The individual to compute the fitness value for.
+
+            Returns
+            -------
+            float
+                The evaluated fitness value of the given individual.
+        """
+        return self.get_frozen_lake_fitness(np.array(individual.vector), num_games=2000)
+        
+    def get_frozen_lake_fitness(self, individual, num_games : int =2000):
+        """
+            Compute the fitness value for a Frozen Lake individual.
+
+            Parameters
+            ----------
+            individual: Vector
+                The individual to compute the fitness value for.
+
+            Returns
+            -------
+            float
+                The evaluated fitness value of the given individual.
+        """
+        fitness_sum = 0
+        for _ in range(num_games):
+            observation, info = self._env.reset()
+            terminated = False
+            truncated = False
+            while not terminated and not truncated:
+                action = individual[self.index_mapping[observation]]
+                observation, reward, terminated, truncated, info = env.step(action)
+                fitness_sum += reward
+        return fitness_sum / num_games
+
+            
+
+        
 
 def main():
     fitness_dict = {}
