@@ -66,16 +66,13 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         """
         if self.freeze_weights:
             self.clear_stacks()
-            self.trained = False
             return
 
         total_batches_length = self.acc_batch_length
         if total_batches_length < self.batch_size:
-            self.trained = False
             return
 
         self.publish(BEFORE_TRAIN_EVENT_NAME)
-        self.trained = True
         self.acc_batch_length = 0
 
         fitness_values, sampled_action_space, sampled_solutions = self.get_batch_and_clear()
@@ -96,6 +93,7 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
             self.scheduler.step(loss)
         
         self.publish(AFTER_TRAIN_EVENT_NAME)
+        self.trained = True
         print(f'loss: {loss}, reward: {torch.mean(fitness_values.type(torch.DoubleTensor))}')
 
     def combine_parents_uniform(self, parents_matrix):

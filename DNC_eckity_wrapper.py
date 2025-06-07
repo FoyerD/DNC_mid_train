@@ -63,6 +63,7 @@ class DeepNeuralCrossover(GeneticOperator):
 
     def apply(self, individuals):
         population = np.array([ind.vector for ind in individuals], dtype='int32')
+        self.dnc_wrapper.trained = False  # Reset training state for each application
         pairs_to_cross, crossover_masks = self.get_pairs_to_crossover(population)
         crossed_parents_pairs = self.dnc_wrapper.cross_pairs(pairs_to_cross)
         next_gen = []
