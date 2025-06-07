@@ -35,6 +35,7 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         self.use_scheduler = use_scheduler
         self.clip_grads = clip_grads
         self.acc_batch_length = 0
+        self.trained = False
 
         if self.load_weights_path is not None:
             self.neural_crossover.load_state_dict(torch.load(self.load_weights_path))
@@ -65,13 +66,16 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         """
         if self.freeze_weights:
             self.clear_stacks()
+            self.trained = False
             return
 
         total_batches_length = self.acc_batch_length
         if total_batches_length < self.batch_size:
+            self.trained = False
             return
 
         self.publish(BEFORE_TRAIN_EVENT_NAME)
+        self.trained = True
         self.acc_batch_length = 0
 
         fitness_values, sampled_action_space, sampled_solutions = self.get_batch_and_clear()
