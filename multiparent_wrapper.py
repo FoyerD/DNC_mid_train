@@ -10,7 +10,7 @@ AFTER_TRAIN_EVENT_NAME = 'after_train'
 class NeuralCrossoverWrapper(BeforeAfterPublisher):
     def __init__(self, embedding_dim, sequence_length, num_embeddings, get_fitness_function, running_mean_decay=0.99,
                  batch_size=32, load_weights_path=None, freeze_weights=False, learning_rate=1e-3, epsilon_greedy=0.1,
-                 use_scheduler=False, use_device='cpu', adam_decay=0, clip_grads=False, n_parents=2, best_of_gen_callback=None, fitness_epsilon=1e-6, events=None, event_names=None):
+                 use_scheduler=False, use_device='cpu', adam_decay=0, clip_grads=False, n_parents=2, fitness_epsilon=1e-6, events=None, event_names=None):
         ext_events_names = event_names if event_names is not None else []
         if events is None:
             # Initialize events dictionary with event names as keys and subscribers as values
@@ -36,12 +36,15 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         self.clip_grads = clip_grads
         self.acc_batch_length = 0
         self.trained = False
-        self.best_of_gen_callback = best_of_gen_callback
+        self.best_of_gen_callback = None
         self.fittness_epsilon = fitness_epsilon
 
         if self.load_weights_path is not None:
             self.neural_crossover.load_state_dict(torch.load(self.load_weights_path))
 
+    def set_best_of_gen_callback(self, callback: callable):
+        self.best_of_gen_callback = callback
+        
     def get_batch_and_clear(self):
         """
         Returns the batch of parents and fitness values and clears the batch.
@@ -74,7 +77,7 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         if total_batches_length < self.batch_size:
             return
         
-        if self.best_of_gen_callback is not None:
+        if self.best_of_gen_callback is not None and self.fitness_epsilon > 0:
             best_batch_fitness = torch.max(torch.cat(self.batch_stack_fitness_values, dim=0).unsqueeze(1))
             if abs(best_batch_fitness - self.best_of_gen_callback()) < self.fitness_epsilon:
                 return False
