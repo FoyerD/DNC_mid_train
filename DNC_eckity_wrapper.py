@@ -11,7 +11,7 @@ from DNC_mid_train.multiparent_wrapper import NeuralCrossoverWrapper
 class DeepNeuralCrossoverConfig:
     def __init__(self, embedding_dim, sequence_length, num_embeddings, running_mean_decay=0.99,
                  batch_size=32, load_weights_path=None, freeze_weights=False, learning_rate=1e-3, epsilon_greedy=0.1,
-                 use_scheduler=False, use_device='cpu', adam_decay=0, clip_grads=False, n_parents=2):
+                 use_scheduler=False, use_device='cpu', adam_decay=0, clip_grads=False, n_parents=2, fitness_epsilon=0):
         self.embedding_dim = embedding_dim
         self.sequence_length = sequence_length
         self.num_embeddings = num_embeddings
@@ -26,6 +26,7 @@ class DeepNeuralCrossoverConfig:
         self.adam_decay = adam_decay
         self.clip_grads = clip_grads
         self.n_parents = n_parents
+        self.fitness_epsilon = fitness_epsilon
 
 
 class GAIntegerStringVectorCreator(GAVectorCreator):
