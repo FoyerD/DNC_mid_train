@@ -37,7 +37,7 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         self.acc_batch_length = 0
         self.trained = False
         self.best_of_gen_callback = None
-        self.fittness_epsilon = fitness_epsilon
+        self.fitness_epsilon = fitness_epsilon
 
         if self.load_weights_path is not None:
             self.neural_crossover.load_state_dict(torch.load(self.load_weights_path))
