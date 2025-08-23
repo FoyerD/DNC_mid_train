@@ -80,7 +80,7 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         if self.best_of_gen_callback is not None and self.fitness_epsilon > 0:
             best_batch_fitness = torch.max(torch.cat(self.batch_stack_fitness_values, dim=0).unsqueeze(1))
             if abs(best_batch_fitness - self.best_of_gen_callback()) < self.fitness_epsilon:
-                return False
+                return
         
         if total_batches_length > self.batch_size:
             self.batch_stack_fitness_values = self.batch_stack_fitness_values[-self.batch_size:]
