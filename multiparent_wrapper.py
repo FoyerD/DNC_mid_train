@@ -175,6 +175,3 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
 
     def save_weights(self, path):
         torch.save(self.neural_crossover.state_dict(), path)
-        
-    def is_trained(self):
-        return self.trained
