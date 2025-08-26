@@ -107,7 +107,7 @@ def main():
         max_workers=1,
         max_generation=6000,
         # termination_checker=ThresholdFromTargetTerminationChecker(optimal=100, threshold=0.0),
-        statistics=BestAverageWorstStatistics()
+        statistics=None
     )
 
     # evolve the generated initial population
