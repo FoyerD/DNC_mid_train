@@ -8,6 +8,10 @@ from eckity.statistics.best_average_worst_statistics import BestAverageWorstStat
 from eckity.subpopulation import Subpopulation
 from eckity.creators.ga_creators.simple_vector_creator import GAVectorCreator
 from eckity.genetic_encodings.ga.int_vector import IntVector
+from eckity.algorithms.simple_evolution import AFTER_GENERATION_EVENT_NAME
+from Logger import Logger
+import matplotlib.pyplot as plt
+import pandas as pd
 import json
 import numpy as np
 
@@ -83,6 +87,12 @@ def main():
     ind_length = dataset_n_items
     min_bound, max_bound = 0, dataset_n_items - 1
 
+
+    statistics_logger = Logger(output_path='statistics.csv')
+    statistics_logger.add_time_col()
+    statistics_logger.add_memory_col(units='KB')
+
+
     # Initialize the evolutionary algorithm
     algo = SimpleEvolution(
         Subpopulation(creators=GAIntegerStringVectorCreator(length=ind_length, bounds=(min_bound, max_bound)),
@@ -105,16 +115,30 @@ def main():
                       ),
         breeder=SimpleBreeder(),
         max_workers=1,
-        max_generation=6000,
+        max_generation=50,
         # termination_checker=ThresholdFromTargetTerminationChecker(optimal=100, threshold=0.0),
-        statistics=None
+        statistics=None,
     )
+
+    algo.register(AFTER_GENERATION_EVENT_NAME, statistics_logger.log)
+    statistics_logger.add_gen_col(algo)
+
 
     # evolve the generated initial population
     algo.evolve()
 
     # Execute (show) the best solution
     print(algo.execute())
+    
+    df = pd.read_csv('statistics.csv')
+
+    plt.plot(df["gen"], df["MEMORY"])
+    plt.xlabel("Generation")
+    plt.ylabel("Memory")
+    plt.title("Memory over Generations")
+    plt.savefig("memory_over_gens.png")
+    plt.close()
+
 
 
 if __name__ == '__main__':
