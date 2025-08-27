@@ -88,7 +88,7 @@ def main():
     min_bound, max_bound = 0, dataset_n_items - 1
 
 
-    statistics_logger = Logger(output_path='statistics.csv')
+    statistics_logger = Logger(output_path='ignore/statistics.csv')
     statistics_logger.add_time_col()
     statistics_logger.add_memory_col(units='KB')
 
@@ -115,9 +115,9 @@ def main():
                       ),
         breeder=SimpleBreeder(),
         max_workers=1,
-        max_generation=50,
+        max_generation=500,
         # termination_checker=ThresholdFromTargetTerminationChecker(optimal=100, threshold=0.0),
-        statistics=None,
+        statistics=BestAverageWorstStatistics(),
     )
 
     algo.register(AFTER_GENERATION_EVENT_NAME, statistics_logger.log)
@@ -130,13 +130,13 @@ def main():
     # Execute (show) the best solution
     print(algo.execute())
     
-    df = pd.read_csv('statistics.csv')
+    df = pd.read_csv('ignore/statistics.csv')
 
     plt.plot(df["gen"], df["MEMORY"])
     plt.xlabel("Generation")
     plt.ylabel("Memory")
     plt.title("Memory over Generations")
-    plt.savefig("memory_over_gens.png")
+    plt.savefig("ignore/memory_over_gens.png")
     plt.close()
 
 
