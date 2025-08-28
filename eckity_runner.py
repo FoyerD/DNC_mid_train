@@ -9,6 +9,7 @@ from eckity.subpopulation import Subpopulation
 from eckity.creators.ga_creators.simple_vector_creator import GAVectorCreator
 from eckity.genetic_encodings.ga.int_vector import IntVector
 from eckity.algorithms.simple_evolution import AFTER_GENERATION_EVENT_NAME
+from eckity.individual import Individual
 from Logger import Logger
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -35,7 +36,7 @@ class BinPackingEvaluator(SimpleIndividualEvaluator):
         self.bin_capacity = bin_capacity
         self.fitness_dict = fitness_dict
 
-    def evaluate_individual(self, individual):
+    def evaluate_individual(self, individual: Individual):
         """
             Compute the fitness value of a given individual.
 
@@ -51,11 +52,11 @@ class BinPackingEvaluator(SimpleIndividualEvaluator):
         """
         return self.get_bin_packing_fitness(np.array(individual.vector))
 
-    def get_bin_packing_fitness(self, individual, penalty=100):
+    def get_bin_packing_fitness(self, individual: Individual, penalty=100):
         fitness_dict = self.fitness_dict
 
-        if tuple(individual) in fitness_dict:
-            return fitness_dict[tuple(individual)]
+        # if tuple(individual) in fitness_dict:
+        #     return fitness_dict[tuple(individual)]
 
         fitness = 0
         bin_capacities = np.zeros(self.n_items)
@@ -72,7 +73,7 @@ class BinPackingEvaluator(SimpleIndividualEvaluator):
             utilized_bins = bin_capacities[bin_capacities > 0]
             fitness = ((bin_capacities / self.bin_capacity) ** 2).sum() / len(utilized_bins)
 
-        fitness_dict[tuple(individual)] = fitness
+        # fitness_dict[tuple(individual)] = fitness
         return fitness
 
 
@@ -138,6 +139,7 @@ def main():
     plt.title("Memory over Generations")
     plt.savefig("ignore/memory_over_gens.png")
     plt.close()
+
 
 
 
