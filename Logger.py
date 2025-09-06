@@ -6,7 +6,7 @@ from eckity.algorithms.simple_evolution import SimpleEvolution
 import psutil
 
 class Logger():
-    def __init__(self, columns: dict = None, dump_every: int = 5, output_path: str = "logs.csv"):
+    def __init__(self, columns: dict = None, dump_every: int = 100, output_path: str = "logs.csv"):
         self._columns = columns if columns is not None else {}
         self._log_data = []  # List to hold log entries
         self._dump_every = dump_every
@@ -73,7 +73,7 @@ class Logger():
     def log_headers(self, path: str):
         headers = list(self._columns.keys())
         with open(path, "a") as file_obj:
-            print(",".join(headers), file=file_obj)
+            file_obj.write(f"{','.join(headers)}\n")
 
     def num_logs(self):
         return len(self._log_data)
@@ -81,12 +81,9 @@ class Logger():
     def get_df(self):
         return pd.DataFrame(self._log_data)
     
-    def add_memory_col(self, units:str, process: psutil.Process = None):
+    def add_memory_col(self, units: str, process: psutil.Process | None = None):
         if process is None:
             process = psutil.Process()
-        if units == 'KB':
-            self.update_column("MEMORY", lambda: process.memory_info().rss / (1024))
-        elif units == 'MB':
-            self.update_column("MEMORY", lambda: process.memory_info().rss / (1024 ** 2))
-        elif units == 'GB':
-            self.update_column("MEMORY", lambda: process.memory_info().rss / (1024 ** 3))
+
+        units_dict = {'KB': 1024, 'MB': 1024 ** 2, 'GB': 1024 ** 3}
+        self.update_column("MEMORY", lambda: process.memory_info().rss / units_dict[units] if units in units_dict else 1024)
