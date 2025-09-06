@@ -62,8 +62,8 @@ class BinPackingEvaluator(SimpleIndividualEvaluator):
     def get_bin_packing_fitness(self, individual, penalty=100):
         fitness_dict = self.fitness_dict
 
-        if tuple(individual) in fitness_dict:
-            return fitness_dict[tuple(individual)]
+        #if tuple(individual) in fitness_dict:
+        #    return fitness_dict[tuple(individual)]
 
         fitness = 0
         bin_capacities = np.zeros(self.n_items)
@@ -80,7 +80,7 @@ class BinPackingEvaluator(SimpleIndividualEvaluator):
             utilized_bins = bin_capacities[bin_capacities > 0]
             fitness = ((bin_capacities / self.bin_capacity) ** 2).sum() / len(utilized_bins)
 
-        fitness_dict[tuple(individual)] = fitness
+        #fitness_dict[tuple(individual)] = fitness
         return fitness
 
 class FrozenLakeEvaluator(SimpleIndividualEvaluator):
