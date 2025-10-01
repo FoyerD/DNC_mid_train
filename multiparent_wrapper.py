@@ -65,6 +65,7 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         self.sampled_action_space.clear()
         self.sampled_solutions.clear()
 
+
     def run_epoch(self):
         """
         Performs one step of training on the neural crossover.
@@ -77,10 +78,14 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         if total_batches_length < self.batch_size:
             return
         
+        if total_batches_length > self.batch_size:
+            self.batch_stack_fitness_values = self.batch_stack_fitness_values[-self.batch_size:]
+            self.sampled_solutions = self.sampled_solutions[-self.batch_size:]
+            self.sampled_action_space = self.sampled_action_space[-self.batch_size:]
+
         if self.best_of_gen_callback is not None and self.fitness_epsilon > 0:
             best_batch_fitness = torch.max(torch.cat(self.batch_stack_fitness_values, dim=0).unsqueeze(1))
             if abs(best_batch_fitness - self.best_of_gen_callback()) < self.fitness_epsilon:
-                self.clear_stacks()
                 return
         
 
