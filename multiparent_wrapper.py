@@ -1,7 +1,6 @@
 from DNC_mid_train.multiparent_dnc import NeuralCrossover
 from eckity.before_after_publisher import BeforeAfterPublisher
 import torch
-print(torch.__version__)
 
 BEFORE_TRAIN_EVENT_NAME = 'before_train'
 AFTER_TRAIN_EVENT_NAME = 'after_train'
@@ -74,15 +73,36 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
             self.clear_stacks()
             return
 
-        total_batches_length = self.acc_batch_length
-        if total_batches_length < self.batch_size:
+        if self.acc_batch_length < self.batch_size or self.acc_batch_length <= 0:
             return
-        
-        if total_batches_length > self.batch_size:
-            to_remove = total_batches_length - self.batch_size
-            del self.batch_stack_fitness_values[:to_remove]
-            del self.sampled_solutions[:to_remove]
-            del self.sampled_action_space[:to_remove]
+
+        # print("Before:")
+        # print(f"- Acc batch: {self.acc_batch_length}")
+        # print(f"- action batch size: {torch.cat(self.sampled_action_space, dim=0).shape[0] / 2}")
+        # print(f"- fitness batch size: {torch.cat(self.batch_stack_fitness_values, dim=0).shape[0] / 2}")
+        # print(f"- solution batch size: {torch.cat(self.sampled_solutions, dim=0).shape[0] / 2}")
+
+        while self.acc_batch_length > self.batch_size:
+            self.acc_batch_length -= self.sampled_action_space[0].shape[0] / 2
+            del self.sampled_action_space[0]
+            del self.batch_stack_fitness_values[0]
+            del self.sampled_solutions[0]
+
+
+        # if self.acc_batch_length > self.batch_size:
+        #     to_remove = self.acc_batch_length - self.batch_size
+        #     del self.batch_stack_fitness_values[:to_remove]
+        #     del self.sampled_solutions[:to_remove]
+        #     del self.sampled_action_space[:to_remove]
+        #     self.acc_batch_length -= to_remove
+
+        print("After:")
+        print(f"- Acc batch: {self.acc_batch_length}")
+        print(f"- action batch size: {torch.cat(self.sampled_action_space, dim=0).shape[0] / 2}")
+        print(f"- fitness batch size: {torch.cat(self.batch_stack_fitness_values, dim=0).shape[0] / 2}")
+        print(f"- solution batch size: {torch.cat(self.sampled_solutions, dim=0).shape[0] / 2}")
+
+
 
         if self.best_of_gen_callback is not None and self.fitness_epsilon > 0:
             best_batch_fitness = torch.max(torch.cat(self.batch_stack_fitness_values, dim=0).unsqueeze(1))
