@@ -9,7 +9,7 @@ AFTER_TRAIN_EVENT_NAME = 'after_train'
 class NeuralCrossoverWrapper(BeforeAfterPublisher):
     def __init__(self, embedding_dim, sequence_length, num_embeddings, get_fitness_function, running_mean_decay=0.99,
                  batch_size=32, load_weights_path=None, freeze_weights=False, learning_rate=1e-3, epsilon_greedy=0.1,
-                 use_scheduler=False, use_device='cpu', adam_decay=0, clip_grads=False, n_parents=2, fitness_epsilon=1e-6, events=None, event_names=None):
+                 use_scheduler=False, use_device='cpu', adam_decay=0, clip_grads=False, n_parents=2, fitness_epsilon=0, events=None, event_names=None):
         ext_events_names = event_names if event_names is not None else []
         if events is None:
             # Initialize events dictionary with event names as keys and subscribers as values
@@ -35,14 +35,14 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         self.clip_grads = clip_grads
         self.acc_batch_length = 0
         self.trained = False
-        self.best_of_gen_callback = None
         self.fitness_epsilon = fitness_epsilon
+        self.best_of_gen = None
 
         if self.load_weights_path is not None:
             self.neural_crossover.load_state_dict(torch.load(self.load_weights_path))
 
-    def set_best_of_gen_callback(self, callback: callable):
-        self.best_of_gen_callback = callback
+    # def set_best_of_gen_callback(self, callback: callable):
+    #     self.best_of_gen_callback = callback
         
     def get_batch_and_clear(self):
         """
@@ -76,11 +76,6 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         if self.acc_batch_length < self.batch_size or self.acc_batch_length <= 0:
             return
 
-        # print("Before:")
-        # print(f"- Acc batch: {self.acc_batch_length}")
-        # print(f"- action batch size: {torch.cat(self.sampled_action_space, dim=0).shape[0] / 2}")
-        # print(f"- fitness batch size: {torch.cat(self.batch_stack_fitness_values, dim=0).shape[0] / 2}")
-        # print(f"- solution batch size: {torch.cat(self.sampled_solutions, dim=0).shape[0] / 2}")
 
         while self.acc_batch_length > self.batch_size:
             self.acc_batch_length -= self.sampled_action_space[0].shape[0] / 2
@@ -88,29 +83,14 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
             del self.batch_stack_fitness_values[0]
             del self.sampled_solutions[0]
 
-
-        # if self.acc_batch_length > self.batch_size:
-        #     to_remove = self.acc_batch_length - self.batch_size
-        #     del self.batch_stack_fitness_values[:to_remove]
-        #     del self.sampled_solutions[:to_remove]
-        #     del self.sampled_action_space[:to_remove]
-        #     self.acc_batch_length -= to_remove
-
-        print("After:")
-        print(f"- Acc batch: {self.acc_batch_length}")
-        print(f"- action batch size: {torch.cat(self.sampled_action_space, dim=0).shape[0] / 2}")
-        print(f"- fitness batch size: {torch.cat(self.batch_stack_fitness_values, dim=0).shape[0] / 2}")
-        print(f"- solution batch size: {torch.cat(self.sampled_solutions, dim=0).shape[0] / 2}")
-
-
-
-        if self.best_of_gen_callback is not None and self.fitness_epsilon > 0:
-            best_batch_fitness = torch.max(torch.cat(self.batch_stack_fitness_values, dim=0).unsqueeze(1))
-            if abs(best_batch_fitness - self.best_of_gen_callback()) < self.fitness_epsilon:
+        best_batch_fitness = torch.max(torch.cat(self.batch_stack_fitness_values, dim=0).unsqueeze(1))
+        if self.best_of_gen is not None and self.fitness_epsilon > 0:
+            if abs(best_batch_fitness - self.best_of_gen) < self.fitness_epsilon:
                 return
         
 
         self.publish(BEFORE_TRAIN_EVENT_NAME)
+        self.best_of_gen = best_batch_fitness
         self.acc_batch_length = 0
 
         fitness_values, sampled_action_space, sampled_solutions = self.get_batch_and_clear()
