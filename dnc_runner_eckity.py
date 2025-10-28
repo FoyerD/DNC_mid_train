@@ -10,6 +10,7 @@ from eckity.statistics.best_average_worst_statistics import BestAverageWorstStat
 from eckity.subpopulation import Subpopulation
 import json
 import numpy as np
+import networkx as nx
 from DNC_mid_train.DNC_eckity_wrapper import DeepNeuralCrossoverConfig, GAIntegerStringVectorCreator, DeepNeuralCrossover
 from random import random
 import gymnasium as gym
@@ -81,6 +82,39 @@ class BinPackingEvaluator(SimpleIndividualEvaluator):
             fitness = ((bin_capacities / self.bin_capacity) ** 2).sum() / len(utilized_bins)
 
         #fitness_dict[tuple(individual)] = fitness
+        return fitness
+
+class GraphColoringEvaluator(SimpleIndividualEvaluator):
+    def __init__(self, G: nx.Graph, fitness_dict=None, penalty=1000):
+        super().__init__()
+        self.G = G
+        self.n_nodes = G.number_of_nodes()
+        self.penalty = penalty
+        self.fitness_dict = {} if fitness_dict is None else {}
+
+        self.edge_array = np.array(G.edges(), dtype=int)
+        self.optimal_coloring = nx.coloring.greedy_color(G, strategy='largest_first')
+        self.num_colors = len(set(self.optimal_coloring.values()))
+
+    def evaluate_individual(self, individual):
+        return self.get_graph_coloring_fitness(np.array(individual.vector))
+
+    def get_graph_coloring_fitness(self, colors):
+        key = tuple(colors)
+        if key in self.fitness_dict:
+            return self.fitness_dict[key]
+
+        color_u = colors[self.edge_array[:, 0]]
+        color_v = colors[self.edge_array[:, 1]]
+        conflicts = np.sum(color_u == color_v)
+        num_colors = len(np.unique(colors))
+
+        if conflicts == 0:
+            fitness = num_colors
+        else:
+            fitness = self.penalty * conflicts
+
+        self.fitness_dict[key] = fitness
         return fitness
 
 class FrozenLakeEvaluator(SimpleIndividualEvaluator):

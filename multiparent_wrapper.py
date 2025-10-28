@@ -1,7 +1,7 @@
 from DNC_mid_train.multiparent_dnc import NeuralCrossover
 from eckity.before_after_publisher import BeforeAfterPublisher
 import torch
-from numpy import stack as np.stack
+from numpy import stack as np_stack
 
 BEFORE_TRAIN_EVENT_NAME = 'before_train'
 AFTER_TRAIN_EVENT_NAME = 'after_train'
@@ -172,7 +172,7 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
 
         parents_grouped = list(zip(*parents_pairs))
 
-        # parents_matrix_np = np.stack(parents_grouped)
+        # parents_matrix_np = np_stack(parents_grouped)
         # parents_matrix = torch.from_numpy(parents_matrix_np)
         parents_matrix = torch.cat([torch.unsqueeze(torch.tensor(group), 0) for group in parents_grouped],
                                    dim=0)
