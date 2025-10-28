@@ -10,7 +10,7 @@ AFTER_TRAIN_EVENT_NAME = 'after_train'
 class NeuralCrossoverWrapper(BeforeAfterPublisher):
     def __init__(self, embedding_dim, sequence_length, num_embeddings, get_fitness_function, running_mean_decay=0.99,
                  batch_size=32, load_weights_path=None, freeze_weights=False, learning_rate=1e-3, epsilon_greedy=0.1,
-                 use_scheduler=False, use_device='cpu', adam_decay=0, clip_grads=False, n_parents=2, fitness_epsilon=0, events=None, event_names=None):
+                 use_scheduler=False, use_device='cpu', adam_decay=0, clip_grads=False, n_parents=2, fitness_epsilon=0, higher_is_better = True, events=None, event_names=None):
         ext_events_names = event_names if event_names is not None else []
         if events is None:
             # Initialize events dictionary with event names as keys and subscribers as values
@@ -38,6 +38,7 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
         self.trained = False
         self.fitness_epsilon = fitness_epsilon
         self.best_of_gen = None
+        self.higher_is_better = higher_is_better
 
         if self.load_weights_path is not None:
             self.neural_crossover.load_state_dict(torch.load(self.load_weights_path))
@@ -84,14 +85,21 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
             del self.batch_stack_fitness_values[0]
             del self.sampled_solutions[0]
 
-        best_batch_fitness = torch.max(torch.cat(self.batch_stack_fitness_values, dim=0).unsqueeze(1))
+        best_func_torch = torch.max if self.higher_is_better else torch.min
+        best_batch_fitness = best_func_torch(torch.cat(self.batch_stack_fitness_values, dim=0).unsqueeze(1))
+
+
         if self.best_of_gen is not None and self.fitness_epsilon > 0:
             if abs(best_batch_fitness - self.best_of_gen) < self.fitness_epsilon:
                 return
         
 
         self.publish(BEFORE_TRAIN_EVENT_NAME)
-        self.best_of_gen = best_batch_fitness
+        if(self.best_of_gen is None):
+            self.best_of_gen = best_batch_fitness
+        else:
+            best_func = max if self.higher_is_better else min
+            self.best_of_gen = best_func(best_batch_fitness, self.best_of_gen)
         self.acc_batch_length = 0
 
         fitness_values, sampled_action_space, sampled_solutions = self.get_batch_and_clear()
