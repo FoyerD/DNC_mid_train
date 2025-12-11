@@ -180,10 +180,9 @@ class NeuralCrossoverWrapper(BeforeAfterPublisher):
 
         parents_grouped = list(zip(*parents_pairs))
 
-        # parents_matrix_np = np_stack(parents_grouped)
-        # parents_matrix = torch.from_numpy(parents_matrix_np)
-        parents_matrix = torch.cat([torch.unsqueeze(torch.tensor(group), 0) for group in parents_grouped],
-                                   dim=0)
+        parents_matrix_np = np_stack(parents_grouped)
+        parents_matrix = torch.from_numpy(parents_matrix_np)
+        # parents_matrix = torch.cat([torch.unsqueeze(torch.tensor(group), 0) for group in parents_grouped], dim=0)
 
         self.acc_batch_length += parents_matrix.shape[1]
         child1, child2 = self.get_crossover(parents_matrix)
